@@ -1,7 +1,9 @@
 #!/usr/bin/python3
+""" Script for Minimum Operations """
 
 
 def minOperations(n):
+    """ Function for Minimum Operations."""
     if n <= 1:
         return 0
 
