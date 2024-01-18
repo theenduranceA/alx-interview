@@ -3,17 +3,20 @@
 
 
 def minOperations(n):
-    """ Function for Minimum Operations."""
+    """ Function for Minimum Operations.
+    Returns an integer.
+    If n is impossible to achieve, return 0 """ 
+
     if n <= 1:
         return 0
 
-    operations = 0
-    divisor = 2
+    x = 0
+    y = 2
 
     while n > 1:
-        while n % divisor == 0:
-            operations += divisor
-            n //= divisor
-        divisor += 1
+        while n % y == 0:
+            x += y
+            n //= y
+        y += 1
 
-    return operations
+    return x
