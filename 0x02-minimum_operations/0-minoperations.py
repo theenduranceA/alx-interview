@@ -5,7 +5,7 @@
 def minOperations(n):
     """ Function for Minimum Operations.
     Returns an integer.
-    If n is impossible to achieve, return 0 """ 
+    If n is impossible to achieve, return 0 """
 
     if n <= 1:
         return 0
