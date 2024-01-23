@@ -2,50 +2,52 @@
 """ Script that reads stdin line by line and computes metrics. """
 
 import sys
-import signal
-
-
-def handle_interrupt(signum, frame):
-    print_stats()
-    sys.exit(0)
+from collections import defaultdict
 
 
 def parse_line(line):
     parts = line.split()
-    if len(parts) == 10 and parts[5] == '"GET' and parts[9].isdigit():
-        return int(parts[8]), int(parts[9])
+    if len(parts) > 4:
+        return parts[-2], int(parts[-1])
     return None
 
 
+def update_metrics(status_code, file_size, status_codes_dict, total_size):
+    if status_code in status_codes_dict:
+        status_codes_dict[status_code] += 1
+    total_size[0] += file_size
+
+
+def print_metrics(total_size, status_codes_dict):
+    print(f'File size: {total_size[0]}')
+    for key, value in sorted(status_codes_dict.items()):
+        if value != 0:
+            print(f'{key}: {value}')
+
+
 def process_input(lines):
-    total_size = 0
-    status_codes = {
-            code: 0 for code in [200, 301, 400, 401, 403, 404, 405, 500]}
-    line_count = 0
+    status_codes_dict = defaultdict(int)
+    total_size = [0]
+    count = 0
 
     try:
-        signal.signal(signal.SIGINT, handle_interrupt)
-
         for line in lines:
             data = parse_line(line)
             if data:
                 status_code, file_size = data
-                total_size += file_size
-                status_codes[status_code] += 1
-                line_count += 1
+                update_metrics(
+                        status_code, file_size, status_codes_dict, total_size)
+                count += 1
 
-                if line_count == 10:
-                    print_stats(total_size, status_codes)
-                    line_count = 0
+                if count == 10:
+                    count = 0
+                    print_metrics(total_size, status_codes_dict)
 
-    except KeyboardInterrupt:
-        print_stats(total_size, status_codes)
+    except Exception as err:
+        pass
 
-
-def print_stats(total_size, status_codes):
-    print(f'Total file size: {total_size}')
-    for code in sorted(status_codes):
-        print(f'{code}: {status_codes[code]}')
+    finally:
+        print_metrics(total_size, status_codes_dict)
 
 
 def main():
