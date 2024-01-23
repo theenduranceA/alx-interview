@@ -1,58 +1,39 @@
 #!/usr/bin/python3
 """ Script that reads stdin line by line and computes metrics. """
 
-import sys
-from collections import defaultdict
+from sys import stdin
 
 
-def parse_line(line):
-    parts = line.split()
-    if len(parts) > 4:
-        return parts[-2], int(parts[-1])
-    return None
+status_codes = {
+        '200': 0, '301': 0, '400': 0, '401': 0,
+        '403': 0, '404': 0, '405': 0, '500': 0
+        }
+size = 0
 
 
-def update_metrics(status_code, file_size, status_codes_dict, total_size):
-    if status_code in status_codes_dict:
-        status_codes_dict[status_code] += 1
-    total_size[0] += file_size
+def compute_metric():
+    """ Function that reads and computes stdin. """
+
+    print("File size: {}".format(size))
+    for key, val in sorted(status_codes.items()):
+        if val > 0:
+            print("{}: {}".format(key, val))
 
 
-def print_metrics(total_size, status_codes_dict):
-    print(f'File size: {total_size[0]}')
-    for key, value in sorted(status_codes_dict.items()):
-        if value != 0:
-            print(f'{key}: {value}')
-
-
-def process_input(lines):
-    status_codes_dict = defaultdict(int)
-    total_size = [0]
-    count = 0
-
+if __name__ == '__main__':
     try:
-        for line in lines:
-            data = parse_line(line)
-            if data:
-                status_code, file_size = data
-                update_metrics(
-                        status_code, file_size, status_codes_dict, total_size)
-                count += 1
+        for i, line in enumerate(stdin, 1):
+            try:
+                my_data = line.split()
+                size += int(my_data[-1])
+                if my_data[-2] in status_codes.keys():
+                    status_codes[my_data[-2]] += 1
+            except Exception:
+                pass
+            if not i % 10:
+                compute_metric()
 
-                if count == 10:
-                    count = 0
-                    print_metrics(total_size, status_codes_dict)
-
-    except Exception as err:
-        pass
-
-    finally:
-        print_metrics(total_size, status_codes_dict)
-
-
-def main():
-    process_input(sys.stdin)
-
-
-if __name__ == "__main__":
-    main()
+    except KeyboardInterrupt:
+        compute_metric()
+        raise
+    compute_metric()
