@@ -6,11 +6,15 @@ def makeChange(coins, total):
     """ Function to determine the fewest number of coins needed to
     meet a given amount total in a pile of coins of different values,"""
 
-    if total < 0:
+    if total <= 0:
         return 0
-    x = [float('inf')] * (total + 1)
-    x[0] = 0
+
+    coins.sort(reverse=True)
+    coins_count = 0
+    remaining_total = total
     for coin in coins:
-        for i in range(coin, total + 1):
-            x[i] = min(x[i], x[i - coin] + 1)
-    return x[total] if x[total] != float('inf') else -1
+        while remaining_total >= coin:
+            remaining_total -= coin
+            coins_count += 1
+
+    return coins_count if remaining_total == 0 else -1
